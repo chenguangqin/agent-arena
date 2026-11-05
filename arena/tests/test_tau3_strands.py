@@ -144,7 +144,7 @@ def test_patch_task_files_idempotent(tmp_path: Path, monkeypatch) -> None:
                "      - TAU2_USER_REASONING_EFFORT=${TAU2_USER_REASONING_EFFORT:-low}\n    volumes: []\n")
     (task / "task.toml").write_text(toml)
     (task / "environment" / "runtime-server").mkdir()
-    (task / "environment" / "Dockerfile").write_text("FROM python:3.12-slim\nRUN pip install tau2\n")
+    (task / "environment" / "Dockerfile").write_text("FROM python:3.12-slim\nRUN git clone --depth=1 \"${TAU2_BENCH_REPO}\" /opt/t\n")
     (task / "environment" / "runtime-server" / "Dockerfile").write_text(
         "FROM python:3.12-slim\nRUN pip install tau2\nCOPY server.py ./\nCMD [\"python3\", \"server.py\"]\n")
     (task / "environment" / "docker-compose.yaml").write_text(compose)
@@ -160,5 +160,6 @@ def test_patch_task_files_idempotent(tmp_path: Path, monkeypatch) -> None:
     assert "AWS_REGION_NAME" in tomllib.loads(t)["verifier"]["env"]
     main_df = (task / "environment" / "Dockerfile").read_text()
     rt_df = (task / "environment" / "runtime-server" / "Dockerfile").read_text()
+    assert main_df.count("--branch v1.0.1") == 1
     assert main_df.count("boto3") == 1 and main_df.endswith("RUN pip install --no-cache-dir boto3\n")
     assert rt_df.count("boto3") == 1 and rt_df.index("boto3") < rt_df.index("COPY server.py")

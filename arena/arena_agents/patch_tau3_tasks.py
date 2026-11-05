@@ -7,6 +7,8 @@ and verifier. This adds (idempotently):
 - verifier env (task.toml): AWS_BEARER_TOKEN_BEDROCK, AWS_REGION_NAME
 - `${OPENAI_API_KEY}` / `${OPENAI_BASE_URL}` get empty defaults so they may be unset.
 - both images (runtime sidecar and main/verifier) install boto3, which LiteLLM needs for Bedrock.
+- both images clone tau2-bench at a pinned ref (TAU2_REF, default v1.0.1) instead of main:
+  the Harbor 0.24 verifier calls the 1.x evaluator API (2.0.0 added a required argument).
 
 AWS credentials are never added; only the short-term Bedrock bearer token.
 
@@ -15,6 +17,7 @@ AWS credentials are never added; only the short-term Bedrock bearer token.
 
 from __future__ import annotations
 
+import os
 import re
 import sys
 from pathlib import Path
@@ -42,10 +45,14 @@ def patch_compose(text: str) -> str:
     return text[: anchor.end()] + extra + text[anchor.end():]
 
 
+TAU2_REF = os.environ.get("TAU2_REF", "v1.0.1")
+CLONE = 'git clone --depth=1 "${TAU2_BENCH_REPO}"'
+
 BOTO3_LAYER = "RUN pip install --no-cache-dir boto3\n"
 
 
 def patch_dockerfile(text: str) -> str:
+    text = text.replace(CLONE, f'git clone --depth=1 --branch {TAU2_REF} "${{TAU2_BENCH_REPO}}"')
     if "boto3" in text:
         return text
     lines = text.splitlines(keepends=True)
