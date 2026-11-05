@@ -66,6 +66,6 @@ for t in "${task_list[@]}"; do
     --ak region="$AWS_REGION" \
     -k "$ATTEMPTS" -n 1 \
     -o "$JOBS" \
-    -e docker
+    -e docker -y
 done
 echo; echo "结果：${JOBS}（harbor view ${JOBS}）"
