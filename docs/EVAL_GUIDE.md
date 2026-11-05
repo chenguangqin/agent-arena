@@ -46,7 +46,10 @@ bash scripts/run_tau3_baseline.sh   # ③ 用 Strands baseline 跑第 1 个任�
 | `N_TASKS` | 1 | 按目录名排序取前 N 个任务 |
 | `TASKS` | — | 指定任务目录名，空格分隔，例如 `"tau3-banking_knowledge-task-001 tau3-banking_knowledge-task-007"` |
 | `ATTEMPTS` | 1 | 每个任务运行次数（用于 pass^k） |
+| `AGENT` | `arena_agents.tau3_strands:StrandsTau3Agent` | Harbor Agent 导入路径（各队的 Agent 见第 6 节） |
 | `MODEL` | `global.anthropic.claude-opus-4-6-v1` | 被测 Agent 的 Bedrock 模型 |
+| `N_CONCURRENT` | 1 | 同时运行的 trial 数（所有任务在一次 harbor run 中） |
+| `JOBS` | `jobs/tau3-baseline`，其他 Agent 为 `jobs/tau3-<类名>` | 结果目录 |
 | `USER_SIM` | `bedrock` | `bedrock` 或 `openai`（`openai` 需要 `OPENAI_API_KEY`，默认 `gpt-5.2`，与上游公开结果可比） |
 | `USER_MODEL` | 见上表 | 模拟用户和判定器的 LiteLLM 模型名 |
 | `AWS_REGION` | `us-west-2` | |
@@ -60,7 +63,10 @@ bash scripts/run_tau3_baseline.sh   # ③ 用 Strands baseline 跑第 1 个任�
 ```bash
 N_TASKS=10 bash scripts/run_tau3_baseline.sh             # 10 题各 1 次，看整体通过率与成本
 TASKS="tau3-banking_knowledge-task-003" ATTEMPTS=3 bash scripts/run_tau3_baseline.sh
+AGENT=arena_agents.team_a:TeamAgent N_TASKS=10 ATTEMPTS=3 N_CONCURRENT=4 bash scripts/run_tau3_baseline.sh
 ```
+
+并发数受机器资源限制：每个 trial 起两个容器（任务声明 4 核、8 GB），并且同时调用 Bedrock。8 核 30 GB 的机器建议不超过 4。
 
 Agent 自身的参数通过 `--ak key=value` 传入（在脚本里修改），可用 `harbor agent schema arena_agents.tau3_strands:StrandsTau3Agent` 查看：`region`、`max_tokens`（4096）、`max_user_turns`（30）、`tool_timeout_sec`（240）。
 
@@ -136,14 +142,40 @@ uv run --project arena harbor view ~/.agent-arena/harbor/jobs/tau3-baseline   # 
 
 ## 6. 接入其他 Agent
 
-在 `arena/arena_agents/` 下新建模块，运行时把 `-a` 换成新的导入路径（例如 `-a arena_agents.my_agent:MyAgent`，修改 `run_tau3_baseline.sh` 或直接运行 `uv run --project arena harbor run ...`，需要 `PYTHONPATH=arena`）。
+**在 baseline 上叠加 harness 手段**（各队提交 Arena 的方式）：在 `arena/arena_agents/` 下新建模块，继承 `StrandsTau3Agent`，覆写下面的扩展点。工具转发和对话循环不用改。
 
-- **在 baseline 上叠加 harness 手段**（prompt caching、hooks、上下文管理、system prompt 等）：继承 `StrandsTau3Agent`，覆写 `build_model()` 或 `run()` 中构造 `Agent` 的部分。工具转发和对话循环不用改。
-- **完全不同的 Agent**：继承 Harbor 的 `BaseAgent`，并且：
-  1. 声明 `capabilities = AgentCapabilities(mcp_servers=True)`；
-  2. `setup()` 中在 main 容器安装 `mcp==1.25.0` 并上传 `mcp_call.py`（可复用 `StrandsTau3Agent.setup` / `call_mcp`）；
-  3. `run()` 中用 `get_assistant_tool_schemas` 取工具定义，按 `start_conversation` → `submit_assistant_message` → 结束原因 的流程对话；
-  4. 在 `populate_context_post_run()` 中回填 token 与 metadata。
+| 扩展点 | 默认行为 | 可以做什么 |
+|---|---|---|
+| `build_system_prompt(policy)` | 简短角色说明 + 任务 policy | 补充做法、回复风格、完成标准 |
+| `build_tools(environment, schemas)` | 领域工具 + `end_conversation` | 包装、过滤、合并工具；整形检索结果 |
+| `build_agent(tools, system_prompt)` | `Agent(model, tools, system_prompt, SequentialToolExecutor)` | hooks、`conversation_manager`、plugins（skills 等） |
+| `build_model()` | `BedrockModel(model_id, region, max_tokens)` | prompt caching 等模型参数（不能换模型） |
+
+```python
+# arena/arena_agents/team_a.py
+from strands import Agent
+from arena_agents.tau3_strands import StrandsTau3Agent
+
+class TeamAgent(StrandsTau3Agent):
+    def build_system_prompt(self, policy: str) -> str:
+        return super().build_system_prompt(policy) + "\n回复简洁，不用 markdown。"
+
+    def build_agent(self, tools, system_prompt) -> Agent:
+        agent = super().build_agent(tools, system_prompt)
+        # 例如：agent.hooks.add_hook(MyPolicyHook())
+        return agent
+```
+
+```bash
+AGENT=arena_agents.team_a:TeamAgent N_TASKS=10 ATTEMPTS=3 bash scripts/run_tau3_baseline.sh
+```
+
+**完全不同的 Agent**：继承 Harbor 的 `BaseAgent`，并且：
+
+1. 声明 `capabilities = AgentCapabilities(mcp_servers=True)`；
+2. `setup()` 中在 main 容器安装 `mcp==1.25.0` 并上传 `mcp_call.py`（可复用 `StrandsTau3Agent.setup` / `call_mcp`）；
+3. `run()` 中用 `get_assistant_tool_schemas` 取工具定义，按 `start_conversation` → `submit_assistant_message` → 结束原因 的流程对话；
+4. 在 `populate_context_post_run()` 中回填 token 与 metadata。
 
 修改后运行离线测试：
 

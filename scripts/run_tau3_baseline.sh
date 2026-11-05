@@ -7,7 +7,10 @@
 #   N_TASKS=5 ATTEMPTS=3 bash scripts/run_tau3_baseline.sh
 #
 # 环境变量：
+#   AGENT        Harbor Agent 导入路径，默认 arena_agents.tau3_strands:StrandsTau3Agent
+#                各队继承 StrandsTau3Agent，放在 arena/arena_agents/<队名>.py
 #   MODEL        被测 Agent 的模型，默认 global.anthropic.claude-opus-4-6-v1
+#   N_CONCURRENT 并发运行的 trial 数，默认 1
 #   USER_SIM     bedrock（默认）或 openai：模拟用户与判定器用哪家模型
 #   USER_MODEL   模拟用户/判定器模型（LiteLLM 名称）
 #                bedrock 默认 bedrock/converse/global.anthropic.claude-haiku-4-5-20251001-v1:0
@@ -18,12 +21,16 @@ set -euo pipefail
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
 HARBOR_HOME="${HARBOR_HOME:-$HOME/.agent-arena/harbor}"
 DATASET="$HARBOR_HOME/datasets/tau3-bench"
+AGENT="${AGENT:-arena_agents.tau3_strands:StrandsTau3Agent}"
 MODEL="${MODEL:-global.anthropic.claude-opus-4-6-v1}"
+N_CONCURRENT="${N_CONCURRENT:-1}"
 USER_SIM="${USER_SIM:-bedrock}"
 AWS_REGION="${AWS_REGION:-us-west-2}"
 ATTEMPTS="${ATTEMPTS:-1}"
 N_TASKS="${N_TASKS:-1}"
-JOBS="$HARBOR_HOME/jobs/tau3-baseline"
+# 结果目录：baseline 为 jobs/tau3-baseline，其他 Agent 为 jobs/tau3-<类名>
+if [ "$AGENT" = "arena_agents.tau3_strands:StrandsTau3Agent" ]; then run_name=baseline; else run_name="${AGENT##*:}"; fi
+JOBS="${JOBS:-$HARBOR_HOME/jobs/tau3-$run_name}"
 
 # shellcheck disable=SC1091
 source "$HARBOR_HOME/env.sh"
@@ -56,16 +63,16 @@ else
     < <(find "$DATASET" -mindepth 1 -maxdepth 1 -type d -exec basename {} \; | sort | head -n "$N_TASKS")
 fi
 
-echo "被测模型 ${MODEL}；模拟用户/判定 ${USER_MODEL}；任务 ${#task_list[@]} 个 × $ATTEMPTS 次"
-for t in "${task_list[@]}"; do
-  echo; echo "== $t"
-  uv run --frozen harbor run \
-    -p "$DATASET/$t" \
-    -a arena_agents.tau3_strands:StrandsTau3Agent \
-    -m "$MODEL" \
-    --ak region="$AWS_REGION" \
-    -k "$ATTEMPTS" -n 1 \
-    -o "$JOBS" \
-    -e docker -y
-done
+echo "Agent ${AGENT}；被测模型 ${MODEL}；模拟用户/判定 ${USER_MODEL}；任务 ${#task_list[@]} 个 × $ATTEMPTS 次"
+# 一次 harbor run 包含全部任务，N_CONCURRENT 控制并发的 trial 数
+filters=()
+for t in "${task_list[@]}"; do filters+=(-i "*$t"); done
+uv run --frozen harbor run \
+  -p "$DATASET" "${filters[@]}" \
+  -a "$AGENT" \
+  -m "$MODEL" \
+  --ak region="$AWS_REGION" \
+  -k "$ATTEMPTS" -n "$N_CONCURRENT" \
+  -o "$JOBS" \
+  -e docker -y
 echo; echo "结果：${JOBS}（harbor view ${JOBS}）"

@@ -163,3 +163,28 @@ def test_patch_task_files_idempotent(tmp_path: Path, monkeypatch) -> None:
     assert main_df.count("--branch v1.0.1") == 1
     assert main_df.count("boto3") == 1 and main_df.endswith("RUN pip install --no-cache-dir boto3\n")
     assert rt_df.count("boto3") == 1 and rt_df.index("boto3") < rt_df.index("COPY server.py")
+
+
+async def test_subclass_extension_points(tmp_path: Path) -> None:
+    """Teams subclass the baseline and override build_* hooks."""
+
+    class TeamAgent(StrandsTau3Agent):
+        def build_system_prompt(self, policy: str) -> str:
+            return "TEAM RULES\n" + super().build_system_prompt(policy)
+
+        def build_tools(self, environment, schemas):
+            return [t for t in super().build_tools(environment, schemas) if t.tool_name != "get_account"]
+
+    runtime = FakeRuntime(user_replies=[])
+    model = ScriptedModel([[text("Hello, how can I help?")]])
+    agent = TeamAgent(
+        logs_dir=tmp_path, model_name="scripted",
+        mcp_servers=[MCPServerConfig(name="tau3-runtime", transport="streamable-http",
+                                     url="http://tau3-runtime:8000/mcp")],
+    )
+    agent.build_model = lambda: model  # type: ignore[method-assign]
+    env = FakeEnv(runtime)
+    await agent.setup(env)
+    await agent.run(INSTRUCTION, env, AgentContext())
+    assert model.requests[0]["system"].startswith("TEAM RULES")
+    assert model.requests[0]["tools"] == ["end_conversation"]

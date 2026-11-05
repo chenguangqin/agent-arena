@@ -176,6 +176,24 @@ class StrandsTau3Agent(BaseAgent):
         call.__name__ = "end_conversation"
         return PythonAgentTool("end_conversation", spec, call)
 
+    # ---------------------------------------------------- extension points
+    # Subclass StrandsTau3Agent and override these to add harness techniques.
+    def build_system_prompt(self, policy: str) -> str:
+        return SYSTEM_PROMPT.format(policy=policy)
+
+    def build_tools(self, environment: BaseEnvironment, schemas: list[dict[str, Any]]) -> list[Any]:
+        """Domain tools (forwarded to the task's MCP server) plus end_conversation."""
+        return [self._domain_tool(environment, s) for s in schemas] + [self._end_tool(environment)]
+
+    def build_agent(self, tools: list[Any], system_prompt: str) -> Agent:
+        return Agent(
+            model=self.build_model(),
+            tools=tools,
+            system_prompt=system_prompt,
+            tool_executor=SequentialToolExecutor(),
+            callback_handler=None,
+        )
+
     def build_model(self) -> Any:
         from strands.models import BedrockModel
 
@@ -190,16 +208,8 @@ class StrandsTau3Agent(BaseAgent):
         is_error, schemas_text = await self.call_mcp(environment, "get_assistant_tool_schemas")
         if is_error:
             raise RuntimeError(f"get_assistant_tool_schemas failed: {schemas_text}")
-        tools = [self._domain_tool(environment, s) for s in json.loads(schemas_text)]
-        tools.append(self._end_tool(environment))
-
-        self._agent = Agent(
-            model=self.build_model(),
-            tools=tools,
-            system_prompt=SYSTEM_PROMPT.format(policy=extract_policy(instruction)),
-            tool_executor=SequentialToolExecutor(),
-            callback_handler=None,
-        )
+        tools = self.build_tools(environment, json.loads(schemas_text))
+        self._agent = self.build_agent(tools, self.build_system_prompt(extract_policy(instruction)))
 
         is_error, user_message = await self.call_mcp(environment, "start_conversation")
         if is_error:
