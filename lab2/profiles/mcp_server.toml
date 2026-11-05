@@ -1,0 +1,5 @@
+# L2.5: the same techniques packaged as a separate MCP server the agent connects to.
+extends = "baseline"
+
+[tools]
+mcp_server = "on"

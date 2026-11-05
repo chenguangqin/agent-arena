@@ -1,0 +1,5 @@
+# L4.1 with Strands AgentSkills.
+extends = "baseline"
+
+[skills]
+mode = "sdk"

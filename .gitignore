@@ -1,0 +1,14 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.env
+*.pem
+jobs/
+run/
+reports/
+# Instructor-only material must never live in this repository.
+instructor/
+hidden/
+.DS_Store

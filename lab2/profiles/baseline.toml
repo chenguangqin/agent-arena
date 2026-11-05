@@ -1,0 +1,4 @@
+# No harness features: the model sees the raw API as-is.
+[limits]
+max_turns = 60
+max_total_tokens = 2000000

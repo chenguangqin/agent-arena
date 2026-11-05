@@ -1,0 +1,5 @@
+# L4.1 hand-built progressive disclosure: names + descriptions, load_skill on demand.
+extends = "baseline"
+
+[skills]
+mode = "hooks"

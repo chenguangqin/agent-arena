@@ -1,0 +1,4 @@
+# No harness features: raw tools, default conversation manager.
+[limits]
+max_turns = 50
+max_total_tokens = 3000000

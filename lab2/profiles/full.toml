@@ -1,0 +1,7 @@
+# Tools (L2.1–L2.4) + governance (L2.6–L2.8).
+extends = "tools"
+
+[governance]
+policy = "hooks"
+approval = "hooks"
+injection_guard = "hooks"

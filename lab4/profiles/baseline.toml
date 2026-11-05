@@ -1,0 +1,4 @@
+# No harness features: a fresh agent per ticket with nothing carried over.
+[limits]
+max_turns = 25
+max_total_tokens = 3000000

@@ -1,0 +1,44 @@
+# Arena 接入描述（Command Adapter v0.2）。不需要修改。
+[agent]
+schema_version = "0.2"
+id = "lab2-student"
+title = "Lab2 · Tools 与 MCP"
+
+[source]
+repository = "."
+revision = "git"
+
+[launcher]
+adapter = "command"
+command = ["uv", "run", "--frozen", "python", "agent_eval_entry.py"]
+input = "jsonl-stdin"
+result = "json-file"
+result_path = "run/result.json"
+startup_timeout_seconds = 60
+run_timeout_seconds = 1200
+
+[environment]
+access = "mcp"
+tools = ["environment_exec"]
+tool_timeout_seconds = 120
+max_output_chars = 16000
+
+[state]
+mode = "isolated-copy"
+snapshot_paths = []
+empty_paths = ["reports", "run"]
+
+[artifacts]
+paths = ["reports/**", "run/**"]
+
+[parameters.mode]
+type = "string"
+default = "baseline"
+delivery = "argv"
+flag = "--mode"
+
+[parameters.model_id]
+type = "string"
+default = "global.anthropic.claude-haiku-4-5-20251001-v1:0"
+delivery = "env"
+name = "MODEL_ID"

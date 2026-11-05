@@ -1,0 +1,5 @@
+# L3.2 with Strands ContextOffloader.
+extends = "baseline"
+
+[context]
+offload = "sdk"

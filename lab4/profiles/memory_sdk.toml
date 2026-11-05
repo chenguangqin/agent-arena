@@ -1,0 +1,6 @@
+# L4.2 with Strands MemoryManager + FileMemoryStore, plus L4.3.
+extends = "baseline"
+
+[memory]
+facts = "sdk"
+lessons = "on"

@@ -1,0 +1,7 @@
+# L2.6–L2.8 on the raw API: policy, harness-managed approval, injection guard.
+extends = "baseline"
+
+[governance]
+policy = "hooks"
+approval = "hooks"
+injection_guard = "hooks"

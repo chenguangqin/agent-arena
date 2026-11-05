@@ -1,0 +1,10 @@
+[variant]
+schema_version = "0.2"
+id = "lab3-baseline"
+agent = "../agent.toml"
+
+[source]
+commit = "HEAD"
+
+[parameters]
+profile = "baseline"

@@ -1,0 +1,5 @@
+# Control group for L4.1: every SOP in full in the system prompt.
+extends = "baseline"
+
+[skills]
+sop_in_prompt = "on"

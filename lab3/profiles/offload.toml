@@ -1,0 +1,5 @@
+# L3.2 hand-built offloader.
+extends = "baseline"
+
+[context]
+offload = "hooks"

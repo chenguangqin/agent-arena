@@ -1,0 +1,19 @@
+# Every Lab5 feature together.
+extends = "baseline"
+
+[planning]
+todo = "on"
+plan_first = "on"
+
+[completion]
+finish_tool = "on"
+checks = "on"
+judge = "hooks"
+
+[orchestration]
+verifier = "on"
+fanout = "on"
+
+[guard]
+stall = "hooks"
+output_recovery = "on"

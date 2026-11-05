@@ -1,0 +1,8 @@
+# L5.3 → L5.4 → L5.5: finish tool, deterministic checks, independent judge (hand-built).
+extends = "baseline"
+
+[completion]
+finish_tool = "on"
+checks = "on"
+judge = "hooks"
+max_rounds = 3
