@@ -46,7 +46,7 @@ mkdir -p "$HARBOR_HOME"
 
 # ---------------------------------------------------------------------------
 step "检查主机"
-info "系统 $OS / $ARCH，工作目录 $HARBOR_HOME"
+info "系统 $OS / ${ARCH}，工作目录 $HARBOR_HOME"
 for c in git curl; do have "$c" || die "缺少 $c"; done
 if [ "$OS" = Darwin ]; then
   cpu=$(sysctl -n hw.ncpu); mem=$(($(sysctl -n hw.memsize) / 1024 / 1024 / 1024))
@@ -213,8 +213,8 @@ run_oracle() {  # 描述 harbor-run 参数...
   local mean
   mean=$(latest_mean "$mark")
   rm -f "$mark"
-  [ "$mean" = "1.000" ] || die "$label 的 oracle 得分为 $mean（期望 1.000），查看 $HARBOR_HOME/jobs 下最新目录"
-  ok "$label：oracle 得分 1.000"
+  [ "$mean" = "1.000" ] || die "$label 的 oracle 得分为 ${mean}（期望 1.000），查看 $HARBOR_HOME/jobs 下最新目录"
+  ok "${label}：oracle 得分 1.000"
 }
 
 step "Harbor 官方 hello-world（oracle）"
@@ -225,7 +225,7 @@ run_oracle hello-world -p "$HARBOR_HOME/benchmark-template/tasks/hello-world"
 
 # ---------------------------------------------------------------------------
 if [ "$SKIP_TB_SAMPLE" != 1 ]; then
-  step "下载 $TB_SAMPLE_DATASET 并运行 $TB_SAMPLE_TASK（oracle）"
+  step "下载 $TB_SAMPLE_DATASET 并运行 ${TB_SAMPLE_TASK}（oracle）"
   if [ ! -d "$HARBOR_HOME/benchmarks/${TB_SAMPLE_DATASET%@*}" ]; then
     (cd "$HARBOR_HOME" && harbor dataset download "$TB_SAMPLE_DATASET" --output-dir benchmarks --export)
   fi
@@ -236,6 +236,6 @@ fi
 
 # ---------------------------------------------------------------------------
 step "完成"
-info "环境变量已写入 $ENV_FILE。新开终端运行 harbor 前先执行："
+info "环境变量已写入 ${ENV_FILE}。新开终端运行 harbor 前先执行："
 info "  source $ENV_FILE"
 info "任务与结果：$HARBOR_HOME/benchmarks、$HARBOR_HOME/jobs"
