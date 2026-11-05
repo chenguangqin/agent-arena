@@ -6,6 +6,7 @@ and verifier. This adds (idempotently):
 - runtime sidecar (docker-compose.yaml): TAU2_USER_LLM_ARGS_JSON, AWS_BEARER_TOKEN_BEDROCK, AWS_REGION_NAME
 - verifier env (task.toml): AWS_BEARER_TOKEN_BEDROCK, AWS_REGION_NAME
 - `${OPENAI_API_KEY}` / `${OPENAI_BASE_URL}` get empty defaults so they may be unset.
+- both images (runtime sidecar and main/verifier) install boto3, which LiteLLM needs for Bedrock.
 
 AWS credentials are never added; only the short-term Bedrock bearer token.
 
@@ -41,6 +42,19 @@ def patch_compose(text: str) -> str:
     return text[: anchor.end()] + extra + text[anchor.end():]
 
 
+BOTO3_LAYER = "RUN pip install --no-cache-dir boto3\n"
+
+
+def patch_dockerfile(text: str) -> str:
+    if "boto3" in text:
+        return text
+    lines = text.splitlines(keepends=True)
+    for i, line in enumerate(lines):  # before the first COPY keeps the task-specific layers last
+        if line.startswith("COPY "):
+            return "".join(lines[:i] + [BOTO3_LAYER] + lines[i:])
+    return text.rstrip("\n") + "\n" + BOTO3_LAYER
+
+
 def patch_task_toml(text: str) -> str:
     text = text.replace("${OPENAI_API_KEY}", "${OPENAI_API_KEY:-}")
     text = text.replace("${OPENAI_BASE_URL}", "${OPENAI_BASE_URL:-}")
@@ -63,6 +77,8 @@ def main() -> int:
         toml.write_text(patch_task_toml(toml.read_text()))
         compose = task / "environment" / "docker-compose.yaml"
         compose.write_text(patch_compose(compose.read_text()))
+        for dockerfile in (task / "environment" / "Dockerfile", task / "environment" / "runtime-server" / "Dockerfile"):
+            dockerfile.write_text(patch_dockerfile(dockerfile.read_text()))
     print(f"patched {len(tasks)} tasks under {root}")
     return 0
 
