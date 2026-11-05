@@ -1,9 +1,0 @@
-# Skills + fact memory + lessons.
-extends = "baseline"
-
-[skills]
-mode = "hooks"
-
-[memory]
-facts = "hooks"
-lessons = "on"

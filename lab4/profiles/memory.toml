@@ -1,6 +1,0 @@
-# L4.2 + L4.3: fact memory and lessons from QA feedback (hand-built).
-extends = "baseline"
-
-[memory]
-facts = "hooks"
-lessons = "on"

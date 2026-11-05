@@ -1,6 +1,0 @@
-# L5.8 + L5.10: stall detection and recovery from truncated (max_tokens) responses.
-extends = "baseline"
-
-[guard]
-stall = "hooks"
-output_recovery = "on"

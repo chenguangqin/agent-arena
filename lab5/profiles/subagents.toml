@@ -1,9 +1,0 @@
-# L5.6 + L5.7 + L5.9: verifier and parallel workers (set sub_model to route them to a smaller model).
-extends = "baseline"
-
-[orchestration]
-verifier = "on"
-fanout = "on"
-batch_size = 8
-max_workers = 4
-sub_model = "same"

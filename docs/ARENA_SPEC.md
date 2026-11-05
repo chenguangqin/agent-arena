@@ -8,7 +8,7 @@
 | 评测框架 | Harbor（版本与 devopsagent 对齐：0.24.0）【待确认：是否升级】 |
 | 前序工程 | `~/Desktop/projects/devopsagent`（Harbor 适配、Command Adapter、MCP Gateway） |
 
-> 各 lab Agent 的设计见 `LABS_SPEC.md`，Agent 与评测框架之间的协议见 `AGENT_PROTOCOL.md`。本文 §5 Baseline Agent 以那两份文档为准。
+> 各 lab 的学员 starter 位于 `labs/`，设计见 `LABS_SPEC.md`，Agent 与评测框架之间的协议见 `AGENT_PROTOCOL.md`。本文 §5 Baseline Agent 以那两份文档为准。
 
 本文中标【决策】的条目是本草案提出的方案，需要评审确认；标【待确认】的条目缺少信息，需要补充后才能定稿。
 

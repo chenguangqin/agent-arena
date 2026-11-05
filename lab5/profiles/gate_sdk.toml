@@ -1,6 +1,0 @@
-# L5.5 with Strands' built-in GoalLoop, for comparison with the hand-built judge.
-extends = "baseline"
-
-[completion]
-judge = "sdk"
-max_rounds = 3

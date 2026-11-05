@@ -1,8 +1,0 @@
-# L2.1–L2.4: curate, compose, shape, explain — all inside the agent.
-extends = "baseline"
-
-[tools]
-catalog = "on"
-composite = "on"
-shaping = "on"
-errors = "on"

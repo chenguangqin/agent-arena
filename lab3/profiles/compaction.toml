@@ -1,7 +1,0 @@
-# L3.4 + L3.5 hand-built template compaction with notes.
-extends = "baseline"
-
-[context]
-compaction = "hooks"
-compaction_tokens = 40000
-notes = "on"

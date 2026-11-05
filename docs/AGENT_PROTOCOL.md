@@ -29,28 +29,30 @@ Agent 是一个外部进程。评测框架只负责：
 
 ### 2.1 Descriptor 示例
 
-每个 lab 一个描述文件，完整示例见 `lab5/agent.toml`。要点：
+每个 lab 一个描述文件，位于 `labs/labN/agent.toml`，lab 目录本身就是 repository。要点：
 
 ```toml
 [source]
-repository = ".."            # 相对于描述文件所在目录，即仓库根目录
+repository = "."             # 相对于描述文件所在目录
 revision = "git"
 
 [launcher]
-command = ["uv", "run", "--frozen", "python", "-m", "lab5", "run"]
+command = ["uv", "run", "--frozen", "python", "agent_eval_entry.py"]
 result_path = "run/result.json"
 
 [state]
 mode = "isolated-copy"
-snapshot_paths = []          # Lab4 为 ["lab4/memory", "lab4/skills"]
+snapshot_paths = []          # Lab4 为 ["memory", "skills"]
 empty_paths = ["reports", "run"]
 
-[parameters.profile]
-type = "enum"
-values = ["baseline", "planning", "gate", "gate_sdk", "subagents", "full"]
+[parameters.mode]            # 选择 agent.py 中的模式
+type = "string"
+default = "baseline"
 delivery = "argv"
-flag = "--profile"
+flag = "--mode"
 ```
+
+`agent_eval_entry.py --solution` 运行参考答案而不是学员的 `agent.py`。
 
 规则：
 
@@ -63,14 +65,14 @@ flag = "--profile"
 ```toml
 [variant]
 schema_version = "0.2"
-id = "lab5-gate"
-agent = "../agent.toml"
+id = "lab5-workflow"
+agent = "agent.toml"
 
 [source]
 commit = "<完整 commit hash>"
 
 [parameters]
-profile = "gate"
+mode = "workflow"
 ```
 
 开发时 `commit` 可以写 `HEAD`，但对比记录中保存的是解析后的 commit。工作区有未提交改动时，结果标记为 `reproducible = false`，运行的仍是已提交的快照。
@@ -85,9 +87,9 @@ profile = "gate"
 {
   "schema_version": "0.2",
   "run_id": "...",
-  "variant": {"id": "lab5-gate", "digest": "..."},
+  "variant": {"id": "lab5-workflow", "digest": "..."},
   "task": {"id": "case-001", "instruction": "..."},
-  "agent_config": {"profile": "gate", "model_id": "..."},
+  "agent_config": {"mode": "workflow", "model_id": "..."},
   "paths": {
     "agent_root": "...",
     "artifact_dir": "...",
@@ -139,7 +141,7 @@ Agent 必须写入 `AGENT_EVAL_RESULT` 指向的文件：
 
 ## 5. 状态隔离
 
-- `snapshot_paths` 中的目录（Lab4 为 `lab4/memory`、`lab4/skills`）在每个 attempt 开始时从提交的快照复制一份；运行中的修改不会回写源仓库，也不会流入其他 attempt。
+- `snapshot_paths` 中的目录（Lab4 为 `memory`、`skills`）在每个 attempt 开始时从提交的快照复制一份；运行中的修改不会回写源仓库，也不会流入其他 attempt。
 - `empty_paths` 中的目录在每个 attempt 开始时为空。
 
 ## 6. Lab Agent 在协议之外的约定
@@ -148,5 +150,5 @@ Agent 必须写入 `AGENT_EVAL_RESULT` 指向的文件：
 
 | 产物 | 内容 |
 |---|---|
-| `reports/trace.jsonl` | 每次模型调用和工具调用的事件记录（格式见 `LABS_SPEC.md` §3.4） |
+| `reports/trace-<时间>.jsonl` / `reports/trace.jsonl` | 每次模型调用和工具调用的事件记录（格式见 `LABS_SPEC.md` §3.4） |
 | `reports/summary.json` | 生效的功能、token 与上下文峰值、各类功能事件计数、结束原因 |

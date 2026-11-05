@@ -1,5 +1,7 @@
 # 真实运行观察记录
 
+> 说明：Lab2、Lab3（前半）、Lab4（前半）、Lab5 的表格数据来自基于 profile 开关的旧实现（git tag `v0-profile-labs`）；新的独立 starter（`labs/`）的运行数据见各 lab 的 `README.md` 与 `LABS_SPEC.md` §6。场景相同，现象可以直接用于课件。
+
 模型：Bedrock `global.anthropic.claude-haiku-4-5-20251001-v1:0`，每个 profile 各运行一次。单次运行有随机性，下面的数字只用来说明现象，不作为评测结论。
 
 ## Lab2 · 重复扣款对账（2026-11-05）

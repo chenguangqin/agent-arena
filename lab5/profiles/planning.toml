@@ -1,6 +1,0 @@
-# L5.1 + L5.2: explicit plan, kept up to date while executing.
-extends = "baseline"
-
-[planning]
-todo = "on"
-plan_first = "on"

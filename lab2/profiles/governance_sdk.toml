@@ -1,7 +1,0 @@
-# L2.7 with Strands HumanInTheLoop (non-interactive ask → approval service).
-extends = "baseline"
-
-[governance]
-policy = "hooks"
-approval = "sdk"
-injection_guard = "hooks"

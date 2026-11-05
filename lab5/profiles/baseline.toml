@@ -1,4 +1,0 @@
-# No harness features: the model decides when it is done.
-[limits]
-max_turns = 60
-max_total_tokens = 2000000

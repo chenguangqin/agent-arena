@@ -1,6 +1,0 @@
-# L3.4 with Strands SummarizingConversationManager (proactive).
-extends = "baseline"
-
-[context]
-compaction = "sdk"
-compaction_tokens = 40000

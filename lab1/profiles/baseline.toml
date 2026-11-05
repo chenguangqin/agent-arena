@@ -1,3 +1,0 @@
-# The loop with nothing added: model + environment tools + a turn limit.
-[limits]
-max_turns = 40

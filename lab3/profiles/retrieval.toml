@@ -1,5 +1,0 @@
-# L3.3 filtered log queries and BM25 runbook search.
-extends = "baseline"
-
-[context]
-retrieval = "on"
