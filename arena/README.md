@@ -2,6 +2,8 @@
 
 外部 benchmark 的接入与 baseline Agent。第一个接入的是 τ³-bench 的 `banking_knowledge`（金融科技客服：约 700 篇知识文档、BM25 检索、修改账户，与模拟用户多轮对话）。
 
+完整操作手册见 [`docs/EVAL_GUIDE.md`](../docs/EVAL_GUIDE.md)。
+
 ## 运行
 
 ```bash

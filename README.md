@@ -31,6 +31,7 @@ uv run python -m solution.agent --mode full --task   # 运行参考答案
 | [`docs/AGENT_PROTOCOL.md`](docs/AGENT_PROTOCOL.md) | 接入 Arena 评测的协议（Command Adapter v0.2） |
 | [`docs/OBSERVATIONS.md`](docs/OBSERVATIONS.md) | 真实运行中观察到的现象，可用作课件素材 |
 | [`docs/STRANDS_NOTES.md`](docs/STRANDS_NOTES.md) | Strands 1.60 能力核查 |
+| [`docs/EVAL_GUIDE.md`](docs/EVAL_GUIDE.md) | **评测操作手册**：Harbor 环境、τ³ banking 任务、Strands baseline、结果判读 |
 | [`docs/ARENA_SPEC.md`](docs/ARENA_SPEC.md) | Arena 基础设施设计（草案，暂缓） |
 
 早期基于 profile 开关的实现保存在 git tag `v0-profile-labs`。
