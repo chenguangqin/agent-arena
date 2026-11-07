@@ -1,5 +1,7 @@
 # Arena 评测：Harbor + Strands baseline
 
+> 评测 Kiro CLI / Claude Code 这类 coding agent CLI 本身：见 [`docs/CLI_EVAL.md`](../docs/CLI_EVAL.md)。
+
 外部 benchmark 的接入与 baseline Agent。第一个接入的是 τ³-bench 的 `banking_knowledge`（金融科技客服：约 700 篇知识文档、BM25 检索、修改账户，与模拟用户多轮对话）。
 
 ## 运行
@@ -18,6 +20,10 @@ bash scripts/run_tau3_baseline.sh   # 用 Strands baseline 跑第 1 个任务
 arena/
 ├── arena_agents/
 │   ├── tau3_strands.py     # Harbor Agent：Strands + Bedrock，跑在宿主机
+│   ├── terminal_strands.py # 终端类任务的 Strands baseline（单 bash 工具）
+│   ├── host_cli.py         # CLI 评测公共部分：容器 MCP 桥、配置目录、进程生命周期
+│   ├── kiro_host.py        # 评测 kiro-cli（宿主机 headless）
+│   ├── claude_host.py      # 评测 Claude Code（宿主机 headless，Bedrock）
 │   ├── mcp_call.py         # 在任务容器内执行：调用一次 MCP 工具，输出 JSON
 │   ├── patch_tau3_tasks.py # 给生成的任务加 Bedrock 变量（模拟用户、判定器）
 │   └── bedrock_token.py    # 生成短期 Bedrock API key

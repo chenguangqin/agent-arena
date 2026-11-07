@@ -28,6 +28,7 @@ uv run python -m solution.agent --mode full --task   # 运行参考答案
 |---|---|
 | [`docs/LAB_GOALS.md`](docs/LAB_GOALS.md) | 各 lab 的实验目标 |
 | [`docs/LABS_SPEC.md`](docs/LABS_SPEC.md) | lab 结构、扩展点、实现约定、验证状态 |
+| [`docs/CLI_EVAL.md`](docs/CLI_EVAL.md) | 评测 Kiro CLI 与 Claude Code：同一 MCP 桥与配置目录、运行方式、指标、安全审核任务集与结果 |
 | [`docs/AGENT_PROTOCOL.md`](docs/AGENT_PROTOCOL.md) | 接入 Arena 评测的协议（Command Adapter v0.2） |
 | [`docs/OBSERVATIONS.md`](docs/OBSERVATIONS.md) | 真实运行中观察到的现象，可用作课件素材 |
 | [`docs/STRANDS_NOTES.md`](docs/STRANDS_NOTES.md) | Strands 1.60 能力核查 |
